@@ -38,7 +38,28 @@ SALT = 'b8c4703bffd39be0729fe85bf4d798bd4d5809f8121a81f8cfb20a286fec6104'
 
 
 class CheckSession():
-    pass
+    def __init__(self) -> None:
+        self.SESSION_IS_NOT = None
+        self.SESSION_IS_INVALID = None
+    
+    def check(self, session: Optional[str]) -> None:
+        if not session:
+            self.SESSION_IS_NOT = True
+            return
+        if self.get_permission(session):
+            self.SESSION_IS_INVALID = False
+            self.SESSION_IS_NOT = False
+        else:
+            self.SESSION_IS_INVALID = True
+
+    #return correct email of username or None if sign is not True
+    @staticmethod
+    def get_permission(session):
+        username_b64, sign = session.split(".")
+        username = base64.b64decode(username_b64).decode()
+        if hmac.compare_digest(sign_data(username), sign):
+            return username
+
 
 
 #Creates hmac for username with secret key
@@ -56,27 +77,26 @@ def check_password(username: str, password: str):
     return users_hash_password == verifiable_hash_password
     
 
-#return correct email of username or None if sign is not True
-def get_permission(session):
-    username_b64, sign = session.split(".")
-    username = base64.b64decode(username_b64).decode()
-    if hmac.compare_digest(sign_data(username), sign):
-        return username
+
 
 @app.get('/')
 def index_page(session: Optional[str] = Cookie(default=None)):
     with open('./templates/login.html', 'r') as html_file:
         login_page = html_file.read()
-    print(session)
-    if not session:
+
+    check_session = CheckSession()
+    check_session.check(session)
+
+    if check_session.SESSION_IS_NOT:
         return Response(login_page, media_type='text/html')
-    valid_username = get_permission(session)
-    if not valid_username:
+
+    if check_session.SESSION_IS_INVALID:
         response = Response(login_page, media_type='text/html')
         response.delete_cookie(key="session")
         return response
-        
-    return Response('Hello, you are logined user', media_type='text/html')
+    with open('./templates/index.html', 'r') as html_file:
+        index_page = html_file.read()
+    return Response(index_page, media_type='text/html')
 
 
 @app.post('/login')
@@ -90,7 +110,20 @@ def process_login_page(data: Json = Body(...)):
         user: dict = users[username]
         key_for_cookie = 'session'
         signed_username = base64.b64encode(username.encode()).decode() + '.' + sign_data(username)
-        response = Response(json.dumps({"sucsess": True,"message":f'Username: {user["name"]},</br>sex: {user["sex"]}'}), media_type='application/json')
+        with open('./templates/succsess_login.html', 'r') as message_html:
+            message = message_html.read()
+        response = Response(json.dumps({"sucsess": True,"message": f'{str(message)}', "username": f'{username}'}), media_type='application/json')
         response.set_cookie(key=key_for_cookie, value=signed_username)
         return response
     return Response(json.dumps({"sucsess": False,"message": 'dont auth'}), media_type='application/json')
+
+
+@app.get('/logout')
+def logout():
+    try:
+        response = Response(json.dumps({"sucsess": True}), media_type='text/html')
+        response.delete_cookie(key="session")
+    except Exception:
+        return Response(json.dumps({"sucsess": False}), media_type='text/html')
+    return response
+

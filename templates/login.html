@@ -1,6 +1,6 @@
 <html>
 <head>
-    <title>Login</title>
+    <title>KREKER</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style type="text/css">
@@ -45,28 +45,24 @@
     </style>
 
     <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function(){
-            // form_data = new FormData(document.querySelector('form'))
-            
-            
+        document.addEventListener('DOMContentLoaded', function(){            
             let form_button = document.querySelector('input[type=submit]')
             form_button.addEventListener('click', async function (event){
                 event.preventDefault();
                 let all_inputs = document.querySelectorAll("input[type=text]")
                 let input_username = all_inputs[0].value
                 let input_password = all_inputs[1].value
-                //console.log("sdvSDvsdv",input_username)
                 let response = await fetch("/login", {
                     method: "POST",
-                    //body: new FormData(document.querySelector('form'))
                     body: JSON.stringify({username: input_username, password: input_password})
-                    //body: `{"username": "${input_username}", "password": "${input_password}"}`
                 });
             let response_json = await response.json()
             console.log(response_json)
             if  (response_json.sucsess) {
-                let body = document.querySelector('body')
-                body.innerHTML = response_json.message
+                let div_mainbox= document.querySelector('div[name=main_box]')
+                div_mainbox.innerHTML = response_json.message
+                let username = div_mainbox.querySelector('div[name=user_name]')
+                username.innerText = response_json.username   
             } else {
                 let warning_message = document.querySelector('div[name=auth_false_warning]')
                 warning_message.style.textAlign = "center"
@@ -79,12 +75,14 @@
 </head>
 <body>
     <div class="placeholder"></div>
-    <form method="POST" action="/login">
-        <input class="text_input" type="text" name="username" placeholder="login" required/>
-        <input class="text_input" type="text" name="password" placeholder="password" required/>
-        <input class="button" type="submit" name="Login" />
-        <div name="auth_false_warning"></div>
-    </form>
+        <div name="main_box">
+            <form method="POST" action="/login">
+                <input class="text_input" type="text" name="username" placeholder="login" required/>
+                <input class="text_input" type="text" name="password" placeholder="password" required/>
+                <input class="button" type="submit" name="Login" />
+                <div name="auth_false_warning"></div>
+            </form>
+        </div>
     <div class="placeholder"></div>
 </body>
 </html>
