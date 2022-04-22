@@ -1,5 +1,6 @@
 #created by roman
 import json
+from pprint import pp, pprint
 import json5
 import hmac
 import hashlib
@@ -7,7 +8,7 @@ import base64
 from lib2to3.pgen2.token import OP
 import typing
 from fastapi import FastAPI, Form, Cookie, Body
-from fastapi.responses import Response
+from fastapi.responses import Response, RedirectResponse
 from typing import Dict, Optional
 from pydantic import BaseModel
 
@@ -21,14 +22,7 @@ users = {
         "password": "c1e76f31c18b1ee50711f0229a8199e328c39f94def2c24f899b9e2e8a87211b", #12345678
         "name": "roman",
         "sex": "male",
-        "session_id": ''
-    },
-
-    "alexey@mail.com": {
-        "password": "2d1db5cd231fbb80f955bf641fdb6b3de6ce54e571633715c122548fb111b237", #01234567
-        "name": "alexey",
-        "sex": "male",
-        "session": ''
+        "about": 'I am Roman)'
     }
 }
 
@@ -127,3 +121,51 @@ def logout():
         return Response(json.dumps({"sucsess": False}), media_type='text/html')
     return response
 
+
+@app.get('/registration')
+def get_registration(session: Optional[str] = Cookie(default=None)):
+    
+
+    check_session = CheckSession()
+    check_session.check(session)
+
+    if check_session.SESSION_IS_NOT:
+        with open('./templates/registration_page.html', 'r') as regiistation_html:
+            registration_page = regiistation_html.read()
+        return Response(registration_page, media_type='text/html')
+
+    if check_session.SESSION_IS_INVALID:
+        response = RedirectResponse(url='/', status_code=303)
+        response.delete_cookie(key="session")
+        return response
+    return RedirectResponse(url='/', status_code=303)
+
+
+
+@app.post('/registration')
+def post_registration(data: Json = Body(...)):
+    username = data["username"]
+    name = data["name"]
+    password = data["password"]
+    sex = data["sex"]
+    about = data["about"]
+    user = users.get(username)
+    if not user:
+        users[username] = {
+            "name": name,
+            "password": hashlib.sha256((SALT + password).encode()).hexdigest(),
+            "sex": sex,
+            "about": about
+            }
+        import pprint
+        pprint.pprint(users)
+        key_for_cookie = 'session'
+        signed_username = base64.b64encode(username.encode()).decode() + '.' + sign_data(username)
+        with open('./templates/succsess_registration.html', 'r') as message_html:
+            message = message_html.read()
+        response = Response(json.dumps({"sucsess": True,"message": f'{str(message)}', "name": f'{name}'}), media_type='application/json')
+        response.set_cookie(key=key_for_cookie, value=signed_username)
+        return response
+    else:
+        return Response(json.dumps({"sucsess": False,"message": 'The user already exists'}), media_type='application/json')
+    

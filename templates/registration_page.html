@@ -46,33 +46,40 @@
 
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function(){
-            let registration_button = document.getElementById("registrtion_button")
-            registration_button.addEventListener('click', function(event){
-                document.location.href = "/registration";
-            })    
+               
 
             let form_button = document.querySelector('input[type=submit]')
             form_button.addEventListener('click', async function (event){
                 event.preventDefault();
                 let all_inputs = document.querySelectorAll("input[type=text]")
                 let input_username = all_inputs[0].value
-                let input_password = all_inputs[1].value
-                let response = await fetch("/login", {
+                let input_name = all_inputs[1].value
+                let input_password = all_inputs[2].value
+                let input_sex = all_inputs[3].value
+                let input_about = all_inputs[4].value
+                let response = await fetch("/registration", {
                     method: "POST",
-                    body: JSON.stringify({username: input_username, password: input_password})
+                    body: JSON.stringify({
+                        username: input_username,
+                        name: input_name, 
+                        password: input_password,
+                        sex: input_sex,
+                        about: input_about
+                    })
                 });
             let response_json = await response.json()
             console.log(response_json)
             if  (response_json.sucsess) {
-                let div_mainbox= document.querySelector('div[name=main_box]')
+                div_mainbox= document.querySelector('div[name=main_box]')
                 div_mainbox.innerHTML = response_json.message
-                let username = div_mainbox.querySelector('div[name=user_name]')
-                username.innerText = response_json.username
-                setTimeout(function(){document.location.href = "/"}, 1500);  
+                username = div_mainbox.querySelector('div[name=uname]')
+                username.innerText = response_json.name
+                setTimeout(function(){document.location.href = "/"}, 1500);
+                  
             } else {
-                let warning_message = document.querySelector('div[name=auth_false_warning]')
+                let warning_message = document.querySelector('div[name=registration_false_warning]')
                 warning_message.style.textAlign = "center"
-                warning_message.innerText = "Wrong data!"
+                warning_message.innerText = response_json.message
                 warning_message.style.color = "red"
             }
             }) 
@@ -83,13 +90,13 @@
     <div class="placeholder"></div>
         <div name="main_box">
             <form method="POST" action="/login">
-                <input class="text_input" type="text" name="username" placeholder="login" required/>
-                <input class="text_input" type="text" name="password" placeholder="password" required/>
-                <input class="button" type="submit" name="Login" style="cursor: pointer"/>
-                <div name="auth_false_warning"></div>
-                    <div id="registrtion_button" style="margin-top: 20px; text-align: center; cursor: pointer; color: rgb(182, 151, 10);" >
-                        Registration
-                    </div>
+                <input class="text_input" type="text" name="username" placeholder="Email" required/>
+                <input class="text_input" type="text" name="name" placeholder="Name" required/>
+                <input class="text_input" type="text" name="password" placeholder="Password" required/>
+                <input class="text_input" type="text" name="sex" placeholder="Sex" required/>
+                <input class="text_input" type="text" name="about" placeholder="About yourself" required/>
+                <input class="button" type="submit" name="Registration" style="cursor: pointer"/>
+                <div name="registration_false_warning"></div>
             </form>
         </div>
     <div class="placeholder"></div>

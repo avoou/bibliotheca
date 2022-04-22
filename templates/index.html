@@ -64,7 +64,7 @@
                 if  (response_json.sucsess) {
                     let div_mainbox= document.querySelector('div[name=main_box]')
                     div_mainbox.innerHTML = "Bye((("
-                    setTimeout("location.reload()", 2000);
+                    setTimeout("location.reload()", 500);
                     
                 } else {
                     let div_mainbox= document.querySelector('div[name=main_box]')
@@ -79,10 +79,17 @@
 <body>
     <div class="placeholder"></div>
         <div name="main_box">
-            <h3>Hello World!</h3>
+            <h4>Спасибо, вот тебе один из самых лучших, анекдот:</h4>
+            <p>Мужику звонят из милиции и говорят:</br>
+                — У нас для вас три новости — плохая, хорошая и охуенная.</br>
+                — Гм, ну давайте с плохой.</br>
+                — Ваша жена погибла — утонула в реке.</br>
+                — А хорошая?</br>
+                — Когда мы ее достали — ее тело было облеплено раками и мы заебато попили пиво всем отделом.</br>
+                — Гм, а охуенная тогда какая?— Мы ее снова забросили в реку и приглашаем вас завтра на пиво!)</p>
         </div>
     <div class="placeholder"></div>
-    <div id="logout">
+    <div id="logout" style="cursor: pointer; border: 2px solid rgb(201, 190, 190); padding: 1.5px;">
         logout
     </div>
 </body>
