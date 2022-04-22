@@ -46,7 +46,6 @@ def sign_data(data: str) -> str:
 def check_password(username: str, password: str):
     users_hash_password = users[username]['password']
     verifiable_hash_password = hashlib.sha256((SALT + password).encode()).hexdigest()
-    print('username', username)
     return users_hash_password == verifiable_hash_password
     
 
@@ -54,9 +53,7 @@ def check_password(username: str, password: str):
 def get_permission(username_sign):
     username_b64, sign = username_sign.split(".")
     username = base64.b64decode(username_b64).decode()
-    if hmac.compare_digest(
-        sign_data(username),
-        sign):
+    if hmac.compare_digest(sign_data(username), sign):
         return username
 
 @app.get('/')
@@ -73,19 +70,14 @@ def index_page(username: Optional[str] = Cookie(default=None)):
         return response
         
     return Response('Hello, you are logined user', media_type='text/html')
-    #return Response(login_page, media_type='text/html')
 
 
 @app.post('/login')
 def process_login_page(data: Json = Body(...)):
-    #username: str = Form(...), password : str = Form(...)
-    #data = json5.loads(data)
     username = data["username"]
     password = data["password"]
     user = users.get(username)
     if not user:
-        #check_password(username, password)
-        #return Response('dont auth', media_type='text/html')
         return Response(json.dumps({"sucsess": False,"message": 'dont auth'}), media_type='application/json')
     elif check_password(username, password):
         user: dict = users[username]
