@@ -36,6 +36,12 @@ users = {
 SECRET_KEY = '6dfd98adf2601c1f54c794fb8376794805972d71d906a3021525b90e54911a4f'
 SALT = 'b8c4703bffd39be0729fe85bf4d798bd4d5809f8121a81f8cfb20a286fec6104'
 
+
+class CheckSession():
+    pass
+
+
+#Creates hmac for username with secret key
 def sign_data(data: str) -> str:
     return hmac.new(
         SECRET_KEY.encode(),
@@ -43,6 +49,7 @@ def sign_data(data: str) -> str:
         digestmod=hashlib.sha256
     ).hexdigest().upper()
 
+#Check the user's password hash in the database with the password from the web form
 def check_password(username: str, password: str):
     users_hash_password = users[username]['password']
     verifiable_hash_password = hashlib.sha256((SALT + password).encode()).hexdigest()
@@ -50,23 +57,23 @@ def check_password(username: str, password: str):
     
 
 #return correct email of username or None if sign is not True
-def get_permission(username_sign):
-    username_b64, sign = username_sign.split(".")
+def get_permission(session):
+    username_b64, sign = session.split(".")
     username = base64.b64decode(username_b64).decode()
     if hmac.compare_digest(sign_data(username), sign):
         return username
 
 @app.get('/')
-def index_page(username: Optional[str] = Cookie(default=None)):
+def index_page(session: Optional[str] = Cookie(default=None)):
     with open('./templates/login.html', 'r') as html_file:
         login_page = html_file.read()
-    print(username)
-    if not username:
+    print(session)
+    if not session:
         return Response(login_page, media_type='text/html')
-    valid_username = get_permission(username)
+    valid_username = get_permission(session)
     if not valid_username:
         response = Response(login_page, media_type='text/html')
-        response.delete_cookie(key="username")
+        response.delete_cookie(key="session")
         return response
         
     return Response('Hello, you are logined user', media_type='text/html')
@@ -81,9 +88,9 @@ def process_login_page(data: Json = Body(...)):
         return Response(json.dumps({"sucsess": False,"message": 'dont auth'}), media_type='application/json')
     elif check_password(username, password):
         user: dict = users[username]
-        key_for_session = 'username'
+        key_for_cookie = 'session'
         signed_username = base64.b64encode(username.encode()).decode() + '.' + sign_data(username)
         response = Response(json.dumps({"sucsess": True,"message":f'Username: {user["name"]},</br>sex: {user["sex"]}'}), media_type='application/json')
-        response.set_cookie(key=key_for_session, value=signed_username)
+        response.set_cookie(key=key_for_cookie, value=signed_username)
         return response
     return Response(json.dumps({"sucsess": False,"message": 'dont auth'}), media_type='application/json')

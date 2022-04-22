@@ -67,8 +67,13 @@
             if  (response_json.sucsess) {
                 let body = document.querySelector('body')
                 body.innerHTML = response_json.message
+            } else {
+                let warning_message = document.querySelector('div[name=auth_false_warning]')
+                warning_message.style.textAlign = "center"
+                warning_message.innerText = "Wrong data!"
+                warning_message.style.color = "red"
             }
-            })  
+            }) 
         })
     </script>
 </head>
@@ -78,6 +83,7 @@
         <input class="text_input" type="text" name="username" placeholder="login" required/>
         <input class="text_input" type="text" name="password" placeholder="password" required/>
         <input class="button" type="submit" name="Login" />
+        <div name="auth_false_warning"></div>
     </form>
     <div class="placeholder"></div>
 </body>
