@@ -11,10 +11,14 @@ from fastapi import FastAPI, Form, Cookie, Body
 from fastapi.responses import Response, RedirectResponse
 from typing import Dict, Optional
 from pydantic import BaseModel
+from fastapi.staticfiles import StaticFiles
+
 
 from pydantic import Json
 
 app = FastAPI()
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 users = {
