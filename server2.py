@@ -1,16 +1,13 @@
 #created by roman
 import json
-from pprint import pp, pprint
-import json5
+import  pprint
 import hmac
 import hashlib
 import base64
-from lib2to3.pgen2.token import OP
 import typing
-from fastapi import FastAPI, Form, Cookie, Body
+from fastapi import FastAPI, Cookie, Body
 from fastapi.responses import Response, RedirectResponse
 from typing import Dict, Optional
-from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
 
 
@@ -84,6 +81,7 @@ def index_page(session: Optional[str] = Cookie(default=None)):
 
     check_session = CheckSession()
     check_session.check(session)
+    print('session', session)
 
     if check_session.SESSION_IS_NOT:
         return Response(login_page, media_type='text/html')
@@ -161,7 +159,6 @@ def post_registration(data: Json = Body(...)):
             "sex": sex,
             "about": about
             }
-        import pprint
         pprint.pprint(users)
         key_for_cookie = 'session'
         signed_username = base64.b64encode(username.encode()).decode() + '.' + sign_data(username)

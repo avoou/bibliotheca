@@ -50,38 +50,46 @@
 
             let form_button = document.querySelector('input[type=submit]')
             form_button.addEventListener('click', async function (event){
-                event.preventDefault();
-                let all_inputs = document.querySelectorAll("input[type=text]")
-                let input_username = all_inputs[0].value
-                let input_name = all_inputs[1].value
-                let input_password = all_inputs[2].value
-                let input_sex = all_inputs[3].value
-                let input_about = all_inputs[4].value
-                let response = await fetch("/registration", {
-                    method: "POST",
-                    body: JSON.stringify({
-                        username: input_username,
-                        name: input_name, 
-                        password: input_password,
-                        sex: input_sex,
-                        about: input_about
-                    })
-                });
-            let response_json = await response.json()
-            console.log(response_json)
-            if  (response_json.sucsess) {
-                div_mainbox= document.querySelector('div[name=main_box]')
-                div_mainbox.innerHTML = response_json.message
-                username = div_mainbox.querySelector('div[name=uname]')
-                username.innerText = response_json.name
-                setTimeout(function(){document.location.href = "/"}, 1500);
-                  
-            } else {
-                let warning_message = document.querySelector('div[name=registration_false_warning]')
-                warning_message.style.textAlign = "center"
-                warning_message.innerText = response_json.message
-                warning_message.style.color = "red"
-            }
+                //event.preventDefault();
+                let all_inputs = document.querySelectorAll("input[class=text_input]")
+                let input_username = all_inputs[0]
+                let input_name = all_inputs[1]
+                let input_password = all_inputs[2]
+                let input_sex = all_inputs[3]
+                let input_about = all_inputs[4]
+                if (input_username.checkValidity() && input_name.checkValidity() && input_password.checkValidity() && input_sex.checkValidity()) {
+                    event.preventDefault();
+                    let response = await fetch("/registration", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            username: input_username.value,
+                            name: input_name.value, 
+                            password: input_password.value,
+                            sex: input_sex.value,
+                            about: input_about.value
+                        })
+                    });
+                
+                    let response_json = await response.json()
+                    console.log(response_json)
+                    if  (response_json.sucsess) {
+                        div_mainbox= document.querySelector('div[name=main_box]')
+                        div_mainbox.innerHTML = response_json.message
+                        username = div_mainbox.querySelector('div[name=uname]')
+                        username.innerText = response_json.name
+                        setTimeout(function(){document.location.href = "/"}, 1500);
+                        
+                    } else {
+                        let warning_message = document.querySelector('div[name=registration_false_warning]')
+                        warning_message.style.textAlign = "center"
+                        warning_message.innerText = response_json.message
+                        warning_message.style.color = "red"
+                    }
+                } else {
+                    let warning_message = document.querySelector('div[name=registration_false_warning]')
+                    warning_message.style.textAlign = "center"
+                    warning_message.innerText = "All fields must be completed!"
+                    warning_message.style.color = "red"}
             }) 
         })
     </script>
@@ -90,11 +98,11 @@
     <div class="placeholder"></div>
         <div name="main_box">
             <form method="POST" action="/login">
-                <input class="text_input" type="text" name="username" placeholder="Email" required/>
+                <input class="text_input" type="email" name="username" placeholder="Email" required/>
                 <input class="text_input" type="text" name="name" placeholder="Name" required/>
-                <input class="text_input" type="text" name="password" placeholder="Password" required/>
+                <input class="text_input" type="password" name="password" placeholder="Password" minlength="6" maxlength="12" required/>
                 <input class="text_input" type="text" name="sex" placeholder="Sex" required/>
-                <input class="text_input" type="text" name="about" placeholder="About yourself" required/>
+                <input class="text_input" type="text" name="about" placeholder="About yourself"/>
                 <input class="button" type="submit" name="Registration" style="cursor: pointer"/>
                 <div name="registration_false_warning"></div>
             </form>

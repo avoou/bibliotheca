@@ -54,28 +54,38 @@
 
             let form_button = document.querySelector('input[type=submit]')
             form_button.addEventListener('click', async function (event){
-                event.preventDefault();
-                let all_inputs = document.querySelectorAll("input[type=text]")
-                let input_username = all_inputs[0].value
-                let input_password = all_inputs[1].value
-                let response = await fetch("/login", {
-                    method: "POST",
-                    body: JSON.stringify({username: input_username, password: input_password})
-                });
-            let response_json = await response.json()
-            console.log(response_json)
-            if  (response_json.sucsess) {
-                let div_mainbox= document.querySelector('div[name=main_box]')
-                div_mainbox.innerHTML = response_json.message
-                let username = div_mainbox.querySelector('div[name=user_name]')
-                username.innerText = response_json.username
-                setTimeout(function(){document.location.href = "/"}, 1500);  
-            } else {
-                let warning_message = document.querySelector('div[name=auth_false_warning]')
-                warning_message.style.textAlign = "center"
-                warning_message.innerText = "Wrong data!"
-                warning_message.style.color = "red"
-            }
+                //event.preventDefault();
+                let all_inputs = document.querySelectorAll("input[class=text_input]")
+                console.log(all_inputs[0].checkValidity())
+                console.log(all_inputs[1].checkValidity())
+                let input_username = all_inputs[0]
+                let input_password = all_inputs[1]
+                if (input_username.checkValidity() && input_password.checkValidity()) {
+                    event.preventDefault();
+
+                    let response = await fetch("/login", {
+                        method: "POST",
+                        body: JSON.stringify({username: input_username.value, password: input_password.value})
+                        });
+                    let response_json = await response.json()
+                    console.log(response_json)
+                    if  (response_json.sucsess) {
+                        let div_mainbox= document.querySelector('div[name=main_box]')
+                        div_mainbox.innerHTML = response_json.message
+                        let username = div_mainbox.querySelector('div[name=user_name]')
+                        username.innerText = response_json.username
+                        setTimeout(function(){document.location.href = "/"}, 1500);  
+                        } else {
+                        let warning_message = document.querySelector('div[name=auth_false_warning]')
+                        warning_message.style.textAlign = "center"
+                        warning_message.innerText = "Wrong data!"
+                        warning_message.style.color = "red"}
+                } else {
+                    let warning_message = document.querySelector('div[name=auth_false_warning]')
+                    warning_message.style.textAlign = "center"
+                    warning_message.innerText = "All fields must be completed!"
+                    warning_message.style.color = "red"
+                    console.log('input is empty')}
             }) 
         })
     </script>
@@ -84,8 +94,8 @@
     <div class="placeholder"></div>
         <div name="main_box">
             <form method="POST" action="/login">
-                <input class="text_input" type="text" name="username" placeholder="login" required/>
-                <input class="text_input" type="text" name="password" placeholder="password" required/>
+                <input class="text_input" type="email" name="username" placeholder="Email" required/>
+                <input class="text_input" type="password" name="password" placeholder="Password" minlength="6" maxlength="12" required/>
                 <input class="button" type="submit" name="Login" style="cursor: pointer"/>
                 <div name="auth_false_warning"></div>
                     <div id="registrtion_button" style="margin-top: 20px; text-align: center; cursor: pointer; color: rgb(182, 151, 10);" >
