@@ -52,7 +52,20 @@
     </style>
 
     <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function(){            
+        document.addEventListener('DOMContentLoaded', async function(){
+
+            //let localTime = new Date().toLocaleTimeString()
+            let tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+            let response = await fetch(`/anecdote/?what_anecdote=today&tz=${tz}`, {
+                    method: "GET"                    
+                })
+                let response_json = await response.json()
+
+                
+                let div_mainbox= document.querySelector('div[name=main_box]')
+                div_mainbox.innerHTML = response_json.message
+                
+
             let logout = document.querySelector('#logout')
             logout.addEventListener('click', async function (event){
                 //event.preventDefault();
@@ -80,14 +93,7 @@
 <body>
     <div class="placeholder"></div>
         <div name="main_box">
-            <h4>Спасибо, вот тебе один из самых лучших, анекдот:</h4>
-            <p>Мужику звонят из милиции и говорят:</br>
-                — У нас для вас три новости — плохая, хорошая и охуенная.</br>
-                — Гм, ну давайте с плохой.</br>
-                — Ваша жена погибла — утонула в реке.</br>
-                — А хорошая?</br>
-                — Когда мы ее достали — ее тело было облеплено раками и мы заебато попили пиво всем отделом.</br>
-                — Гм, а охуенная тогда какая?— Мы ее снова забросили в реку и приглашаем вас завтра на пиво!)</p>
+            
         </div>
     <div class="placeholder"></div>
     <div id="logout" style="cursor: pointer; border: 2px solid rgb(201, 190, 190); padding: 1.5px;">

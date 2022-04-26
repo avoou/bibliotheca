@@ -62,7 +62,6 @@
                 let input_password = all_inputs[1]
                 if (input_username.checkValidity() && input_password.checkValidity()) {
                     event.preventDefault();
-
                     let response = await fetch("/login", {
                         method: "POST",
                         body: JSON.stringify({username: input_username.value, password: input_password.value})
@@ -71,7 +70,15 @@
                     console.log(response_json)
                     if  (response_json.sucsess) {
                         let div_mainbox= document.querySelector('div[name=main_box]')
-                        div_mainbox.innerHTML = response_json.message
+                        div_mainbox.innerHTML = `<div name="message">
+                                                    Hello, 
+                                                        <h3 style="display: inline-block;">
+                                                            <div name="user_name" style="display: inline-block;"></div>!
+                                                        </h3>
+                                                    </br>
+                                                    You are successfully logged in)))</br>
+                                                    Loading ...
+                                                </div>`
                         let username = div_mainbox.querySelector('div[name=user_name]')
                         username.innerText = response_json.username
                         setTimeout(function(){document.location.href = "/"}, 1500);  
@@ -79,13 +86,9 @@
                         let warning_message = document.querySelector('div[name=auth_false_warning]')
                         warning_message.style.textAlign = "center"
                         warning_message.innerText = "Wrong data!"
-                        warning_message.style.color = "red"}
-                } else {
-                    let warning_message = document.querySelector('div[name=auth_false_warning]')
-                    warning_message.style.textAlign = "center"
-                    warning_message.innerText = "All fields must be completed!"
-                    warning_message.style.color = "red"
-                    console.log('input is empty')}
+                        warning_message.style.color = "red"
+                    }
+                } 
             }) 
         })
     </script>
