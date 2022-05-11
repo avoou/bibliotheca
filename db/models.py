@@ -1,6 +1,14 @@
+from email.policy import default
 from sqlalchemy import Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 from .database import Base
+
+
+authors_book_table = Table("authors_books", Base.metadata,
+			   Column("author_id", Integer, ForeignKey("authors.id"), primary_key=True),
+			   Column("book_id", Integer, ForeignKey("books.id"), primary_key=True)
+			   )
+
 
 class User(Base):
     __tablename__ = "users"
@@ -16,8 +24,8 @@ class Book(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
-    description = Column(String)
-    authors = relationship("Author", secodary=authors_book_table, back_populates="books")
+    description = Column(String, default=None)
+    authors = relationship("Author", secondary=authors_book_table, back_populates="books")
 
 
 class Author(Base):
@@ -25,12 +33,5 @@ class Author(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     full_name = Column(String, nullable=False)
-    fast_facts = Column(String)
+    fast_facts = Column(String, default=None)
     books = relationship("Book", secondary=authors_book_table, back_populates="authors")
-
-
-authors_book_table = Table("authors_books", Base.metadata,
-			   Column("author_id", Integer, ForeignKey("authors.id"), primary_key=True),
-			   Column("book_id", Integer, ForeignKey("books.id"), primary_key=True)
-			   )
-

@@ -1,0 +1,247 @@
+
+<!doctype html>
+<title>Пример</title>
+<head>
+    <title>Bibliotheca</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link id="favicon" rel="icon" type="image/x-icon" href="static/images/favicon.ico">
+    <style>
+        * {
+          box-sizing: border-box; 
+        }
+        body {
+          margin: 0;
+          background-color:#f8f8ff;
+          width: auto;
+          
+        }
+        #main {
+          display: flex;
+          min-height: 80vh;
+          height: auto;
+          
+        }
+        #field {
+          display: flex;
+          flex-direction: column;
+          
+          align-items: center;
+          height: auto;
+        }
+        #book{
+          margin: 20px;
+          background:#ededf7;
+          height: auto;
+          width: 53vw;
+          min-height: 15vh;
+          min-width: 200px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-direction: column;
+          padding: 1em;
+          align-content: flex-start;
+          word-wrap: break-word;
+        }
+       
+
+        #main > #field {
+          background: #f8f8ff;
+          flex: 1;
+        }
+
+        .add_inp {
+            padding: 1em;
+            margin-left: 0.5vw;
+          margin-right: 0.5vw;
+          height: 7vh;
+          width: 41vw;
+          background: #f8f8ff;
+          
+          max-height: 50px;
+        }
+        
+        #header, #field, #left, #right, #add, #inp, #search {
+          padding: 1em;
+        }
+        header {
+          display: flex;
+          
+          flex-direction: column; 
+          
+          justify-content: center;
+          align-items: center;
+          
+          
+        }
+
+        #header {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background: #f8f8ff;
+          height: 10vh;
+          flex-direction: row;
+          flex-wrap: nowrap;
+          margin: 20px;
+        }
+        #add, #inp, #search {
+          /*margin: 5px;*/
+          margin-left: 0.5vw;
+          margin-right: 0.5vw;
+        }
+        #add {
+          background: #9898ec;
+          height: 7vh;
+          width: 5vw;
+          min-width: 50px;
+          min-height: 15px;
+          max-height: 50px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          
+          cursor: pointer;
+
+        }
+
+        #inp {
+          height: 7vh;
+          width: 41vw;
+          background: #f8f8ff;
+          
+          max-height: 50px;
+          
+        }
+
+        #search {
+          background: #9898ec;
+          height: 7vh;
+          width: 5vw;
+          min-height: 15px;
+          min-width: 50px;
+          max-height: 50px;
+          
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          
+          cursor: pointer;
+
+        }
+        #send {
+          background: #9898ec;
+          height: 7vh;
+          width: 7vw;
+          min-width: 50px;
+          min-height: 15px;
+          max-height: 50px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-width: 60px;
+          margin: 7px;
+          cursor: pointer;
+        }
+        #title {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-top: 5vh;
+        }
+        
+        </style>
+    <script type="text/javascript">
+      document.addEventListener('DOMContentLoaded', function(){
+
+        let search_button = document.getElementById('search')
+        let search_input = document.getElementById('inp')
+
+        search_button.addEventListener('click', function(event){
+          if (search_input.checkValidity()) {           
+            let field = document.getElementById('field')
+            field.innerHTML = ''
+            let search_inputvalue = `
+              Когда вода Всемирного потопа
+              Вернулась вновь в границы берегов,
+              Из пены уходящего потока
+              На сушу тихо выбралась Любовь —
+              И растворилась в воздухе до срока,
+              А срока было — сорок сороков…`
+
+            let array = [`<div id="book">${search_inputvalue}</div>`, `<div id="book">${search_inputvalue}</div>`, `<div id="book">${search_inputvalue}</div>`
+            , `<div id="book">${search_inputvalue}</div>`, `<div id="book">${search_inputvalue}</div>`, `<div id="book">${search_inputvalue}</div>`
+            , `<div id="book">${search_inputvalue}</div>`, `<div id="book">${search_inputvalue}</div>`, `<div id="book">${search_inputvalue}</div>`]
+            for (let index = 0; index < array.length; index++) {
+              field.innerHTML += array[index];
+            }   
+          }
+        })
+    
+
+        
+
+        let add_button = document.getElementById('add')
+        add_button.addEventListener('click', function(event){
+          let field = document.getElementById('field')
+          field.innerHTML = `<div id="book">
+            <input class="add_inp" id="inp_add_title" type="text" placeholder="Title of book" maxlength="128" required></br>
+            <input class="add_inp" id="inp_add_authors" type="text" placeholder="Authors" maxlength="128" required></br>
+            <input class="add_inp" id="inp_add_description" type="text" placeholder="Description" maxlength="1024" required>
+            <div id="send">Send</div>
+            <div name="warning"></div>
+                            </div>`
+
+            let send_add_button = document.getElementById('send')
+            send_add_button.addEventListener('click', function(event){
+                let inp_add_title = document.getElementById('inp_add_title')
+                let inp_add_authors = document.getElementById('inp_add_authors')
+                let inp_add_description = document.getElementById('inp_add_description')
+
+                if (inp_add_title.checkValidity() && inp_add_authors.checkValidity() && inp_add_description.checkValidity()) {
+                    //event.preventDefault();
+                    let response =  fetch("http://127.0.0.1:8000/add", {
+                        headers: {'Content-Type': 'application/json'},
+                        method: "POST",
+                        body: JSON.stringify({
+                            title: inp_add_title.value,
+                            authors: inp_add_authors.value, 
+                            description: inp_add_description.value
+                        })
+                    })
+                } else {let warning_message = document.querySelector('div[name=warning]')
+                        warning_message.style.textAlign = "center"
+                        warning_message.innerText = 'All fields must be fill'
+                        warning_message.style.color = "red"
+                    }
+            })
+        })
+    })
+    </script>
+</head>
+
+<body>
+  <header>
+    <div id="title"><p style="font-size: 60px; margin: 0px;">Bibliotheca</p></div>
+    <div id="header">
+    <div id="add"><h1>+</h1></div>
+    <input id="inp" type="text" maxlength="128" placeholder="Title of book or author" required>
+    <div id="search">Search</div>
+  </div>
+  </header>
+    
+      <div id="main">
+        <div id="field">
+          <div id="book">BOOK</div>
+          <div id="book">BOOK</div>
+          <div id="book">BOOK</div>
+          <div id="book">BOOK</div>
+          <div id="book">BOOK</div>
+          <div id="book">BOOK</div>
+          <div id="book">BOOK</div>
+          <div id="book">BOOK</div>
+        </div>
+        
+    </div>
+</body>
