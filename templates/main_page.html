@@ -194,22 +194,38 @@
                             </div>`
 
             let send_add_button = document.getElementById('send')
-            send_add_button.addEventListener('click', function(event){
+            send_add_button.addEventListener('click', async function(event){
                 let inp_add_title = document.getElementById('inp_add_title')
                 let inp_add_authors = document.getElementById('inp_add_authors')
                 let inp_add_description = document.getElementById('inp_add_description')
 
                 if (inp_add_title.checkValidity() && inp_add_authors.checkValidity() && inp_add_description.checkValidity()) {
                     //event.preventDefault();
-                    let response =  fetch("http://127.0.0.1:8000/add", {
+                    let response =  await fetch("/add", {
                         headers: {'Content-Type': 'application/json'},
                         method: "POST",
                         body: JSON.stringify({
                             title: inp_add_title.value,
                             authors: inp_add_authors.value, 
                             description: inp_add_description.value
-                        })
+                        })                 
                     })
+                    let response_json = await response.json()
+                    //console.log(response_json)
+                    console.log("OK: ",response.ok)
+
+                    if (response.ok){
+                      let warning_message = document.querySelector('div[name=warning]')
+                      warning_message.style.textAlign = "center"
+                      warning_message.innerText = 'Book added!'
+                      warning_message.style.color = "green"
+                    } else {
+                      let warning_message = document.querySelector('div[name=warning]')
+                      warning_message.style.textAlign = "center"
+                      warning_message.innerText = response_json.detail
+                      warning_message.style.color = "red"
+                    }
+
                 } else {let warning_message = document.querySelector('div[name=warning]')
                         warning_message.style.textAlign = "center"
                         warning_message.innerText = 'All fields must be fill'

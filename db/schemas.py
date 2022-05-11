@@ -1,16 +1,25 @@
 from typing import Optional
 from pydantic import BaseModel
 
+class Author(BaseModel):
+    full_name: str
+    fast_facts: Optional[str] = None
+    class Config:
+        orm_mode = True
+
 class BookBase(BaseModel):
-    title: Optional[None] = str
-    authors: Optional[None] = str
+    title: str
+    authors: str
 
 
 class BookAdd(BookBase):
     description: str
 
 
-class BookOut(BookBase):
+class BookOut(BaseModel):
+    title: str
+    authors: list[Author]
+
     description: str
 
     class Config:
