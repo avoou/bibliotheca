@@ -7,7 +7,7 @@ from db.database import SessionLocal, engine
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
+print("here")
 def get_db():
     db = SessionLocal()
     try:
@@ -16,7 +16,7 @@ def get_db():
         db.close()
 
 
-@app.get("/")
+@app.get("/c")
 def get_main_page():
     with open("./templates/main_page.html", "r") as html_file:
         main_page = html_file.read()
