@@ -32,6 +32,6 @@ class Author(Base):
     __tablename__ = "authors"
 
     id = Column(Integer, primary_key=True, index=True)
-    full_name = Column(String, nullable=False)
+    full_name = Column(String, unique=True, nullable=False)
     fast_facts = Column(String, default=None)
     books = relationship("Book", secondary=authors_book_table, back_populates="authors")

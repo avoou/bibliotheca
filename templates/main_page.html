@@ -158,30 +158,40 @@
         let search_button = document.getElementById('search')
         let search_input = document.getElementById('inp')
 
-        search_button.addEventListener('click', function(event){
+        search_button.addEventListener('click', async function(event){
           if (search_input.checkValidity()) {           
             let field = document.getElementById('field')
             field.innerHTML = ''
-            let search_inputvalue = `
-              Когда вода Всемирного потопа
-              Вернулась вновь в границы берегов,
-              Из пены уходящего потока
-              На сушу тихо выбралась Любовь —
-              И растворилась в воздухе до срока,
-              А срока было — сорок сороков…`
+            
 
-            let array = [`<div id="book">${search_inputvalue}</div>`, `<div id="book">${search_inputvalue}</div>`, `<div id="book">${search_inputvalue}</div>`
-            , `<div id="book">${search_inputvalue}</div>`, `<div id="book">${search_inputvalue}</div>`, `<div id="book">${search_inputvalue}</div>`
-            , `<div id="book">${search_inputvalue}</div>`, `<div id="book">${search_inputvalue}</div>`, `<div id="book">${search_inputvalue}</div>`]
-            for (let index = 0; index < array.length; index++) {
-              field.innerHTML += array[index];
-            }   
+            let response = await fetch(`/search/?search_request=${search_input.value}`, {
+              method: "GET"
+            })
+
+            let response_json = await response.json()
+            console.log(response_json)
+
+            if (response.ok) {
+              for (let book_index=0; book_index<response_json.books.length; book_index++) {
+                let authors = ''
+                for (let index=0; index<response_json.books[book_index].authors.length; index++) {
+                  authors += `${response_json.books[book_index].authors[index].full_name} `
+                  console.log(response_json.books[book_index].authors[index].full_name)
+                } 
+                field.innerHTML += `<div id="book">
+                <p>Title: ${response_json.books[book_index].title}</p>
+                <p>Authors: ${authors}</p>
+                <p>Description: ${response_json.books[book_index].description}</p>
+                </div>`
+              }
+            } else {
+                field.innerHTML += `<div id="book">
+                <p>${response_json.detail}</p>
+                </div>`
+            }
           }
         })
-    
-
-        
-
+  
         let add_button = document.getElementById('add')
         add_button.addEventListener('click', function(event){
           let field = document.getElementById('field')
@@ -201,12 +211,20 @@
 
                 if (inp_add_title.checkValidity() && inp_add_authors.checkValidity() && inp_add_description.checkValidity()) {
                     //event.preventDefault();
+                    //.replaceAll(' ', '').split(/[ w^,;]/)
+                    let authors_list = []
+                    for (let author of inp_add_authors.value.split(/[;,]/)) {
+                      authors_list.push({full_name: author.trimEnd().trimStart()})
+                      }
+
+                    console.log(authors_list)
+                    
                     let response =  await fetch("/add", {
                         headers: {'Content-Type': 'application/json'},
                         method: "POST",
                         body: JSON.stringify({
                             title: inp_add_title.value,
-                            authors: inp_add_authors.value, 
+                            authors: authors_list, 
                             description: inp_add_description.value
                         })                 
                     })
