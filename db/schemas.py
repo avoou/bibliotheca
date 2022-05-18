@@ -43,7 +43,7 @@ class BooksList(BaseModel):
         orm_mode = True
 
 class UserIn(BaseModel):
-    name: str
+    name: Optional[str] = None
     email: str
     password: str
 

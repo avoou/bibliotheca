@@ -60,9 +60,10 @@
                 if (input_username.checkValidity() && input_name.checkValidity() && input_password.checkValidity() && input_sex.checkValidity()) {
                     event.preventDefault();
                     let response = await fetch("/registration", {
+                        headers: {'Content-Type': 'application/json'},
                         method: "POST",
                         body: JSON.stringify({
-                            username: input_username.value,
+                            email: input_username.value,
                             name: input_name.value, 
                             password: input_password.value,
                             sex: input_sex.value,

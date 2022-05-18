@@ -29,7 +29,7 @@
           align-items: center;
           height: auto;
         }
-        #book{
+        .book{
           margin: 20px;
           background:#ededf7;
           height: auto;
@@ -52,13 +52,12 @@
         }
 
         .add_inp {
-            padding: 1em;
-            margin-left: 0.5vw;
+          padding: 1em;
+          margin-left: 0.5vw;
           margin-right: 0.5vw;
           height: 7vh;
           width: 41vw;
           background: #f8f8ff;
-          
           max-height: 50px;
         }
         
@@ -67,9 +66,7 @@
         }
         header {
           display: flex;
-          
           flex-direction: column; 
-          
           justify-content: center;
           align-items: center;
           
@@ -130,7 +127,7 @@
           cursor: pointer;
 
         }
-        #send {
+        .send {
           background: #9898ec;
           height: 7vh;
           width: 7vw;
@@ -150,10 +147,42 @@
           align-items: center;
           margin-top: 5vh;
         }
+
+        #edit_flex {
+          display: flex;
+          justify-content:right;
+          align-items:right;
+          flex-direction:row;
+          
+          height: auto;
+          width: 53vw;
+        }
+
+        .edit_button {
+          display: flex;
+          background: #98cdec;
+          height: 6vh;
+          width: 3vw;
+          margin: 5px;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          min-width: 35px;
+          min-height: 18px;
+          max-width: 45px;
+          max-height: 28px;
+          margin-right: 10px;
+        }
         
         </style>
     <script type="text/javascript">
       document.addEventListener('DOMContentLoaded', function(){
+        function myFunction() {
+                
+                
+                console.log('EDIT')
+              
+              }
 
         let search_button = document.getElementById('search')
         let search_input = document.getElementById('inp')
@@ -168,24 +197,101 @@
               method: "GET"
             })
 
-            let response_json = await response.json()
-            console.log(response_json)
+            const response_json = await response.json()
 
             if (response.ok) {
-              for (let book_index=0; book_index<response_json.books.length; book_index++) {
-                let authors = ''
-                for (let index=0; index<response_json.books[book_index].authors.length; index++) {
-                  authors += `${response_json.books[book_index].authors[index].full_name} `
-                  console.log(response_json.books[book_index].authors[index].full_name)
-                } 
-                field.innerHTML += `<div id="book">
-                <p>Title: ${response_json.books[book_index].title}</p>
-                <p>Authors: ${authors}</p>
-                <p>Description: ${response_json.books[book_index].description}</p>
-                </div>`
+
+              BookEntry = {
+                id: '',
+                book_json: '',
+                authors: '',
+                inner_html: '112',
+                edit_button_func: function () {
+                  let book_entry_html = document.getElementById(`book${this.book_json["id"]}`)
+                  book_entry_html.innerHTML = `
+                      <div class="book">
+                        <div id="edit_flex">
+                          <div name="btn" id="cancel" class="edit_button">
+                            <h3>x</h3>
+                          </div>
+                        </div>
+                        <input class="add_inp" id="inp_add_title${this.book_json["id"]}" type="text" placeholder="Title of book" maxlength="128" required></br>
+                        <input class="add_inp" id="inp_add_authors${this.book_json["id"]}" type="text" placeholder="Authors" maxlength="128" required></br>
+                        <input class="add_inp" id="inp_add_description${this.book_json["id"]}" type="text" placeholder="Description" maxlength="1024" required>
+                        <div id="submit${this.book_json["id"]}" class="send">Submit</div>
+                        <div name="warning"></div>
+                      </div>`
+                  let inp_add_title = document.getElementById(`inp_add_title${this.book_json["id"]}`)
+                  inp_add_title.value = `${this.book_json["title"]}`
+                  let inp_add_authors = document.getElementById(`inp_add_authors${this.book_json["id"]}`)
+                  inp_add_authors.value = `${this.authors}`
+                  let inp_add_description = document.getElementById(`inp_add_description${this.book_json["id"]}`)
+                  inp_add_description.value = `${this.book_json["description"]}`
+                  let submit_button = document.getElementById(`submit${this.book_json["id"]}`)
+                  let cancel_button = document.getElementById(`cancel`)
+                  var self = this
+                  cancel_button.addEventListener('click', function(){
+                    book_entry_html.innerHTML = self.inner_html
+                    let btn = document.getElementById(`edit${self.book_json["id"]}`)
+                    btn.addEventListener('click', function (){self.edit_button_func()})
+                  })
+                  submit_button.addEventListener('click', async function() {
+                    let authors_list = []
+                    for (let author of inp_add_authors.value.split(/[;,]/)) {
+                      authors_list.push({full_name: author.trimEnd().trimStart()})
+                      }
+                    let response = await fetch("edit", {
+                      headers: {'Content-Type': 'application/json'},
+                      method: "POST",
+                      body: JSON.stringify({
+                        title: inp_add_title.value,
+                        authors: authors_list,
+                        description: inp_add_description.value,
+                      })
+                    })
+
+                    const response_json = await response.json()
+                  })
+                  console.log(this.inner_html)
+                },
+                fill_in_inner_html: function () {
+                  let authors = ''
+                  for (let index=0; index<this.book_json["authors"].length; index++) {
+                    this.authors += `${this.book_json["authors"][index].full_name}, `
+                  }
+                  this.inner_html = `<div id="book${this.book_json["id"]}" class="book">
+                                    <p>Title: ${this.book_json["title"]}</p>
+                                    <p>Authors: ${this.authors}</p>
+                                    <p>Description: ${this.book_json["description"]}</p>
+                                    <div id="edit_flex">
+                                      <div name="btn" id="edit${this.book_json["id"]}" class="edit_button">
+                                        Edit
+                                      </div>
+                                    </div>
+                                    </div>`
+                  /*let btn = document.getElementById(`edit${this.book_json["id"]}`)
+                  btn.addEventListener('click', function (){this.edit_button_func()})*/
+                },
               }
+
+              let book_entry_array = []
+
+              for (let book_index=0; book_index<response_json.books.length; book_index++) {
+                obj_book_entry = {...BookEntry}
+                obj_book_entry.book_json = response_json.books[book_index]
+                obj_book_entry.fill_in_inner_html()
+                book_entry_array.push(obj_book_entry)
+                field.innerHTML += obj_book_entry.inner_html 
+              }
+              
+              div_array = document.querySelectorAll("div[name=btn]")
+              for (let div_index=0; div_index<div_array.length; div_index++) {
+                let btn = div_array[div_index]
+                btn.addEventListener('click', function (){book_entry_array[div_index].edit_button_func()})
+              }
+
             } else {
-                field.innerHTML += `<div id="book">
+                field.innerHTML += `<div class="book">
                 <p>${response_json.detail}</p>
                 </div>`
             }
@@ -195,11 +301,11 @@
         let add_button = document.getElementById('add')
         add_button.addEventListener('click', function(event){
           let field = document.getElementById('field')
-          field.innerHTML = `<div id="book">
+          field.innerHTML = `<div class="book">
             <input class="add_inp" id="inp_add_title" type="text" placeholder="Title of book" maxlength="128" required></br>
             <input class="add_inp" id="inp_add_authors" type="text" placeholder="Authors" maxlength="128" required></br>
             <input class="add_inp" id="inp_add_description" type="text" placeholder="Description" maxlength="1024" required>
-            <div id="send">Send</div>
+            <div id="send" class="send">Send</div>
             <div name="warning"></div>
                             </div>`
 
@@ -267,14 +373,14 @@
     
       <div id="main">
         <div id="field">
-          <div id="book">BOOK</div>
-          <div id="book">BOOK</div>
-          <div id="book">BOOK</div>
-          <div id="book">BOOK</div>
-          <div id="book">BOOK</div>
-          <div id="book">BOOK</div>
-          <div id="book">BOOK</div>
-          <div id="book">BOOK</div>
+          <div class="book">BOOK</div>
+          <div class="book">BOOK</div>
+          <div class="book">BOOK</div>
+          <div class="book">BOOK</div>
+          <div class="book">BOOK</div>
+          <div class="book">BOOK</div>
+          <div class="book">BOOK</div>
+          <div class="book">BOOK</div>
         </div>
         
     </div>
