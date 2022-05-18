@@ -10,6 +10,7 @@ class Author(BaseModel):
         orm_mode = True
 
 class BookBase(BaseModel):
+    id: Optional[int] = None
     title: str
     authors: list[Author]
 
@@ -29,7 +30,7 @@ class BookOut(BaseModel):
 
 
 class BookChange(BookBase):
-    description: Optional[None] = str
+    description: Optional[str] = None
 
 
 class BookAuthorSearch(BaseModel):

@@ -24,6 +24,7 @@ def add_book(db: Session, book: schemas.BookAdd):
             db_author = get_author_by_fullname(db=db, full_name=author)
             if not db_author:
                 db_author = models.Author(full_name=author)
+                db.add(db_author)
             db_book.authors.append(db_author)
         db.add(db_book)
         db.commit()
@@ -72,7 +73,21 @@ def get_authors_by_fullnames(db: Session, authors: list[str]):
     return all_books_by_authors
 
 def book_change(db: Session, book: schemas.BookChange):
-    pass
+    #id=5 title='book2' authors=[Author(id=None, full_name='author1', fast_facts=None), Author(id=None, full_name='author2', fast_facts=None)]
+    authors = [author.full_name for author in book.authors]
+    db_book = db.query(models.Book).filter(models.Book.id == book.id).first()
+    for author in authors:
+        db_author = get_author_by_fullname(db=db, full_name=author)
+        if not db_author:
+            db_author = models.Author(full_name=author)
+            db.add(db_author)
+        db_book.authors.append(db_author)
+    db_book.title = book.title
+    db_book.description = book.description
+    db.add(db_book)
+    db.commit()
+    db.refresh(db_book)
+    return db_book
 
 def get_user_by_email(db: Session, users_email: str):
     return db.query(models.User).filter(models.User.email==users_email).first()

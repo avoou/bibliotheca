@@ -40,7 +40,7 @@
           justify-content: center;
           align-items: center;
           flex-direction: column;
-          padding: 1em;
+          /*padding: 1em;*/
           align-content: flex-start;
           word-wrap: break-word;
         }
@@ -173,16 +173,35 @@
           max-height: 28px;
           margin-right: 10px;
         }
+
+        #logout {
+            position: fixed; 
+            top: 20px; 
+            right: 20px;
+        }
         
         </style>
     <script type="text/javascript">
       document.addEventListener('DOMContentLoaded', function(){
-        function myFunction() {
+        let logout = document.querySelector('#logout')
+          logout.addEventListener('click', async function (event){
+              //event.preventDefault();
+            console.log('logout')
+            let response = await fetch("/logout", {
+                method: "GET"
+            })
+            let response_json = await response.json()
+
+            if  (response_json.sucsess) {
+                let div_mainbox= document.querySelector('div[name=main_box]')
                 
+                setTimeout("location.reload()", 500);
                 
-                console.log('EDIT')
-              
-              }
+            } else {
+                let div_mainbox= document.querySelector('div[name=main_box]')
+                div_mainbox.innerHTML = 'whats wrong! Try again'
+            }
+            })
 
         let search_button = document.getElementById('search')
         let search_input = document.getElementById('inp')
@@ -191,7 +210,6 @@
           if (search_input.checkValidity()) {           
             let field = document.getElementById('field')
             field.innerHTML = ''
-            
 
             let response = await fetch(`/search/?search_request=${search_input.value}`, {
               method: "GET"
@@ -211,7 +229,7 @@
                   book_entry_html.innerHTML = `
                       <div class="book">
                         <div id="edit_flex">
-                          <div name="btn" id="cancel" class="edit_button">
+                          <div name="btn" id="cancel${this.book_json["id"]}" class="edit_button">
                             <h3>x</h3>
                           </div>
                         </div>
@@ -219,7 +237,7 @@
                         <input class="add_inp" id="inp_add_authors${this.book_json["id"]}" type="text" placeholder="Authors" maxlength="128" required></br>
                         <input class="add_inp" id="inp_add_description${this.book_json["id"]}" type="text" placeholder="Description" maxlength="1024" required>
                         <div id="submit${this.book_json["id"]}" class="send">Submit</div>
-                        <div name="warning"></div>
+                        <div id="warning${this.book_json["id"]}"></div>
                       </div>`
                   let inp_add_title = document.getElementById(`inp_add_title${this.book_json["id"]}`)
                   inp_add_title.value = `${this.book_json["title"]}`
@@ -228,7 +246,7 @@
                   let inp_add_description = document.getElementById(`inp_add_description${this.book_json["id"]}`)
                   inp_add_description.value = `${this.book_json["description"]}`
                   let submit_button = document.getElementById(`submit${this.book_json["id"]}`)
-                  let cancel_button = document.getElementById(`cancel`)
+                  let cancel_button = document.getElementById(`cancel${this.book_json["id"]}`)
                   var self = this
                   cancel_button.addEventListener('click', function(){
                     book_entry_html.innerHTML = self.inner_html
@@ -242,8 +260,9 @@
                       }
                     let response = await fetch("edit", {
                       headers: {'Content-Type': 'application/json'},
-                      method: "POST",
+                      method: "PUT",
                       body: JSON.stringify({
+                        id: self.book_json["id"],
                         title: inp_add_title.value,
                         authors: authors_list,
                         description: inp_add_description.value,
@@ -251,14 +270,27 @@
                     })
 
                     const response_json = await response.json()
+                    if (response.ok) {
+                      let warning_message = document.getElementById(`warning${self.book_json["id"]}`)
+                      warning_message.style.textAlign = "center"
+                      warning_message.innerText = 'The book is edited!'
+                      warning_message.style.color = "green"
+                    } else {
+                      let warning_message = document.getElementById(`warning${self.book_json["id"]}`)
+                      warning_message.style.textAlign = "center"
+                      warning_message.innerText = 'Something wrong!'
+                      warning_message.style.color = "red"
+                    }
+
+
                   })
-                  console.log(this.inner_html)
                 },
                 fill_in_inner_html: function () {
                   let authors = ''
                   for (let index=0; index<this.book_json["authors"].length; index++) {
                     this.authors += `${this.book_json["authors"][index].full_name}, `
                   }
+                  this.authors = this.authors.trimEnd().slice(0,-1)
                   this.inner_html = `<div id="book${this.book_json["id"]}" class="book">
                                     <p>Title: ${this.book_json["title"]}</p>
                                     <p>Authors: ${this.authors}</p>
@@ -269,13 +301,10 @@
                                       </div>
                                     </div>
                                     </div>`
-                  /*let btn = document.getElementById(`edit${this.book_json["id"]}`)
-                  btn.addEventListener('click', function (){this.edit_button_func()})*/
                 },
               }
 
               let book_entry_array = []
-
               for (let book_index=0; book_index<response_json.books.length; book_index++) {
                 obj_book_entry = {...BookEntry}
                 obj_book_entry.book_json = response_json.books[book_index]
@@ -316,14 +345,10 @@
                 let inp_add_description = document.getElementById('inp_add_description')
 
                 if (inp_add_title.checkValidity() && inp_add_authors.checkValidity() && inp_add_description.checkValidity()) {
-                    //event.preventDefault();
-                    //.replaceAll(' ', '').split(/[ w^,;]/)
                     let authors_list = []
                     for (let author of inp_add_authors.value.split(/[;,]/)) {
                       authors_list.push({full_name: author.trimEnd().trimStart()})
                       }
-
-                    console.log(authors_list)
                     
                     let response =  await fetch("/add", {
                         headers: {'Content-Type': 'application/json'},
@@ -335,7 +360,6 @@
                         })                 
                     })
                     let response_json = await response.json()
-                    //console.log(response_json)
                     console.log("OK: ",response.ok)
 
                     if (response.ok){
@@ -371,17 +395,12 @@
   </div>
   </header>
     
-      <div id="main">
-        <div id="field">
-          <div class="book">BOOK</div>
-          <div class="book">BOOK</div>
-          <div class="book">BOOK</div>
-          <div class="book">BOOK</div>
-          <div class="book">BOOK</div>
-          <div class="book">BOOK</div>
-          <div class="book">BOOK</div>
-          <div class="book">BOOK</div>
-        </div>
-        
+  <div id="main">
+      <div id="field">
+        <div class="book"><h3>Hello, welcome to the Bibliotheca!</h3></div>
+      </div> 
+    </div>
+    <div id="logout" style="cursor: pointer; border: 2px solid rgb(201, 190, 190); padding: 1.5px;">
+      logout
     </div>
 </body>

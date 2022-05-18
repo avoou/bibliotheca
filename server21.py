@@ -53,6 +53,14 @@ def search_book_author(search_request: str, db: Session = Depends(get_db)):
     raise HTTPException(status_code=400, detail="Nothing was found for your query")
     
 
+@app.put("/edit")
+def edit_exists_book(book: schemas.BookChange, db: Session = Depends(get_db)):
+    print(book.id, book.authors)
+    db_book = crud.book_change(book=book, db=db)
+    if db_book:
+        return db_book
+    raise HTTPException(status_code=400, detail="Something wrong!")
+
 SECRET_KEY = '6dfd98adf2601c1f54c794fb8376794805972d71d906a3021525b90e54911a4f'
 
 
