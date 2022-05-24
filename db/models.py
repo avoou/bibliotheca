@@ -1,4 +1,3 @@
-from email.policy import default
 from sqlalchemy import Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 from .database import Base
@@ -34,4 +33,4 @@ class Author(Base):
     id = Column(Integer, primary_key=True, index=True)
     full_name = Column(String, unique=True, nullable=False)
     fast_facts = Column(String, default=None)
-    books = relationship("Book", secondary=authors_book_table, back_populates="authors")
+    books = relationship("Book", secondary=authors_book_table, back_populates="authors") #, cascade_backrefs=False

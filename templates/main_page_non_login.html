@@ -1,0 +1,193 @@
+
+<!doctype html>
+<title>Пример</title>
+<head>
+    <title>Bibliotheca</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link id="favicon" rel="icon" type="image/x-icon" href="static/images/favicon.ico">
+    <style>
+        * {
+          box-sizing: border-box; 
+        }
+        body {
+          margin: 0;
+          background-color:#f8f8ff;
+          width: auto;
+          
+        }
+        #main {
+          display: flex;
+          min-height: 80vh;
+          height: auto;
+          
+        }
+        #field {
+          display: flex;
+          flex-direction: column;
+          
+          align-items: center;
+          height: auto;
+        }
+
+        .book{
+          margin: 20px;
+          background:#ededf7;
+          height: auto;
+          width: 53vw;
+          min-height: 15vh;
+          min-width: 200px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          flex-direction: column;
+          /*padding: 1em;*/
+          align-content: flex-start;
+          word-wrap: break-word;
+        }
+
+        #main > #field {
+          background: #f8f8ff;
+          flex: 1;
+        }
+        
+        #header, #field, #left, #right, #inp, #search {
+          padding: 1em;
+        }
+
+        header {
+          display: flex;
+          flex-direction: column; 
+          justify-content: center;
+          align-items: center;
+        }
+
+        #header {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background: #f8f8ff;
+          height: 10vh;
+          flex-direction: row;
+          flex-wrap: nowrap;
+          margin: 20px;
+        }
+        
+        #inp, #search {
+          /*margin: 5px;*/
+          margin-left: 0.5vw;
+          margin-right: 0.5vw;
+        }
+
+        #inp {
+          height: 7vh;
+          width: 41vw;
+          background: #f8f8ff;
+          max-height: 50px; 
+        }
+
+        #search {
+          background: #9898ec;
+          height: 7vh;
+          width: 5vw;
+          min-height: 15px;
+          min-width: 50px;
+          max-height: 50px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          cursor: pointer;
+        }
+
+        #title {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-top: 5vh;
+        }
+
+        #login {
+            position: fixed; 
+            top: 20px; 
+            right: 20px;
+        }  
+    </style>
+    <script type="text/javascript">
+      document.addEventListener('DOMContentLoaded', function(){
+        let login = document.querySelector('#login')
+          login.addEventListener('click', async function (event){
+              document.location.href = "/login";
+            })
+
+        let search_button = document.getElementById('search')
+        let search_input = document.getElementById('inp')
+
+        search_button.addEventListener('click', async function(event){
+          if (search_input.checkValidity()) {           
+            let field = document.getElementById('field')
+            field.innerHTML = ''
+
+            let response = await fetch(`/search/?search_request=${search_input.value}`, {
+              method: "GET"
+            })
+
+            const response_json = await response.json()
+
+            if (response.ok) {
+
+              BookEntry = {
+                id: '',
+                book_json: '',
+                authors: '',
+                inner_html: '',
+                
+                fill_in_inner_html: function () {
+                  let authors = ''
+                  for (let index=0; index<this.book_json["authors"].length; index++) {
+                    this.authors += `${this.book_json["authors"][index].full_name}, `
+                  }
+                  this.authors = this.authors.trimEnd().slice(0,-1)
+                  this.inner_html = `<div id="book${this.book_json["id"]}" class="book">
+                                    <p>Title: ${this.book_json["title"]}</p>
+                                    <p>Authors: ${this.authors}</p>
+                                    <p>Description: ${this.book_json["description"]}</p>
+                                    </div>`
+                },
+              }
+
+              for (let book_index=0; book_index<response_json.books.length; book_index++) {
+                obj_book_entry = {...BookEntry}
+                obj_book_entry.book_json = response_json.books[book_index]
+                obj_book_entry.fill_in_inner_html()
+                field.innerHTML += obj_book_entry.inner_html 
+              }
+            } else {
+                field.innerHTML += `<div class="book">
+                <p>${response_json.detail}</p>
+                </div>`
+            }
+          }
+        })       
+    })
+    </script>
+</head>
+<body>
+  <header>
+    <div id="title"><p style="font-size: 60px; margin: 0px;">Bibliotheca</p></div>
+    <div id="header">
+    <input id="inp" type="text" maxlength="128" placeholder="Title of book or author" required>
+    <div id="search">Search</div>
+  </div>
+  </header>
+  <div id="main">
+      <div id="field">
+        <div class="book"><h3>Hello, welcome to the Bibliotheca!</h3><br>
+          You are not logged in. Register or log in with your account
+        </div>
+        </div>
+      </div> 
+    </div>
+    <div id="login" style="cursor: pointer; border: 2px solid rgb(201, 190, 190); padding: 1.5px;">
+      login
+    </div>
+</body>

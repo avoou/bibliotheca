@@ -70,8 +70,8 @@
                     });
                 
                     let response_json = await response.json()
-                    console.log(response_json)
-                    if  (response_json.sucsess) {
+                    console.log(response.ok)
+                    if  (response.ok) {
                         div_mainbox= document.querySelector('div[name=main_box]')
                         div_mainbox.innerHTML = `<div name="message">
                                                     Hello, 
@@ -89,7 +89,7 @@
                     } else {
                         let warning_message = document.querySelector('div[name=registration_false_warning]')
                         warning_message.style.textAlign = "center"
-                        warning_message.innerText = response_json.message
+                        warning_message.innerText = response_json.detail
                         warning_message.style.color = "red"}
                 } 
             }) 

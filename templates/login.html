@@ -67,9 +67,10 @@
                         method: "POST",
                         body: JSON.stringify({email: input_username.value, password: input_password.value})
                         });
+
                     let response_json = await response.json()
-                    console.log(response_json)
-                    if  (response_json.sucsess) {
+
+                    if  (response.ok) {
                         let div_mainbox= document.querySelector('div[name=main_box]')
                         div_mainbox.innerHTML = `<div name="message">
                                                     Hello, 
@@ -86,7 +87,7 @@
                         } else {
                         let warning_message = document.querySelector('div[name=auth_false_warning]')
                         warning_message.style.textAlign = "center"
-                        warning_message.innerText = "Wrong data!"
+                        warning_message.innerText = response_json.detail /*"Wrong data!"*/
                         warning_message.style.color = "red"
                     }
                 } 

@@ -1,10 +1,12 @@
 
 
 import email
+from statistics import mode
 from sqlalchemy.orm import Session
 from . import models, schemas
 from sqlalchemy.exc import PendingRollbackError
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, delete
+from db.database import engine
 import hashlib
 
 SALT = 'b8c4703bffd39be0729fe85bf4d798bd4d5809f8121a81f8cfb20a286fec6104'
@@ -76,6 +78,7 @@ def book_change(db: Session, book: schemas.BookChange):
     #id=5 title='book2' authors=[Author(id=None, full_name='author1', fast_facts=None), Author(id=None, full_name='author2', fast_facts=None)]
     authors = [author.full_name for author in book.authors]
     db_book = db.query(models.Book).filter(models.Book.id == book.id).first()
+    db_book.authors = []
     for author in authors:
         db_author = get_author_by_fullname(db=db, full_name=author)
         if not db_author:
@@ -88,6 +91,17 @@ def book_change(db: Session, book: schemas.BookChange):
     db.commit()
     db.refresh(db_book)
     return db_book
+
+
+def delete_book_by_id(db: Session, id: int):
+    db_book = db.query(models.Book).get(id)
+    if db_book:
+        db_book.authors = []
+        db.commit()
+        engine.execute(delete(models.Book).where(models.Book.id==id))
+        return True
+    return False
+
 
 def get_user_by_email(db: Session, users_email: str):
     return db.query(models.User).filter(models.User.email==users_email).first()

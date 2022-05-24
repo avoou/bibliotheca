@@ -24,13 +24,6 @@ def get_db():
         db.close()
 
 
-'''@app.get("/")
-def get_main_page():
-    with open("./templates/main_page.html", "r") as html_file:
-        main_page = html_file.read()
-    return Response(main_page, media_type='text/html')'''
-
-
 @app.post("/add", response_model=schemas.BookOut)
 def add_book(book: schemas.BookAdd = Body(...), db: Session = Depends(get_db)):
     db_book = crud.add_book(db=db, book=book)
@@ -45,7 +38,6 @@ def search_book_author(search_request: str, db: Session = Depends(get_db)):
         book_list = {"books":[schemas.BookOut.from_orm(book).dict() for book in db_book]} 
         return Response(json.dumps(book_list), media_type='application/json')
     authors_list = [author.strip() for author in re.split(r'[;,]',search_request)]
-
     all_books_by_author = crud.get_authors_by_fullnames(db=db, authors=authors_list)
     if all_books_by_author:
         book_list = {"books":[schemas.BookOut.from_orm(book).dict() for book in all_books_by_author]} 
@@ -55,11 +47,18 @@ def search_book_author(search_request: str, db: Session = Depends(get_db)):
 
 @app.put("/edit")
 def edit_exists_book(book: schemas.BookChange, db: Session = Depends(get_db)):
-    print(book.id, book.authors)
     db_book = crud.book_change(book=book, db=db)
     if db_book:
         return db_book
     raise HTTPException(status_code=400, detail="Something wrong!")
+
+
+@app.delete("/book/{id}")
+def delete_book(id: int, db: Session = Depends(get_db)):
+    if crud.delete_book_by_id(db=db, id=id):
+        return Response(json.dumps({"details": 'This book is deleted!'}), media_type='application/json')
+    raise HTTPException(status_code=400, detail="Something wrong!")
+
 
 SECRET_KEY = '6dfd98adf2601c1f54c794fb8376794805972d71d906a3021525b90e54911a4f'
 
@@ -114,12 +113,31 @@ def check_password(db: Session, users_email: str, password: str):
 
 @app.get('/')
 def index_page(session: Optional[str] = Cookie(default=None)):
+    with open('./templates/main_page_non_login.html', 'r') as html_file:
+        non_login_page = html_file.read()
+
+    check_session = CheckSession()
+    check_session.check(session)
+
+    if check_session.SESSION_IS_NOT:
+        return Response(non_login_page, media_type='text/html')
+
+    if check_session.SESSION_IS_INVALID:
+        response = Response(non_login_page, media_type='text/html')
+        response.delete_cookie(key="session")
+        return response
+    with open('./templates/main_page.html', 'r') as html_file:
+        main_page = html_file.read()
+    return Response(main_page, media_type='text/html')
+
+
+@app.get('/login')
+def login(session: Optional[str] = Cookie(default=None)):
     with open('./templates/login.html', 'r') as html_file:
         login_page = html_file.read()
 
     check_session = CheckSession()
     check_session.check(session)
-    print('session', session)
 
     if check_session.SESSION_IS_NOT:
         return Response(login_page, media_type='text/html')
@@ -137,14 +155,14 @@ def index_page(session: Optional[str] = Cookie(default=None)):
 def process_login_page(user: schemas.UserIn = Body(...), db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db=db, users_email=user.email)
     if not db_user:
-        return Response(json.dumps({"sucsess": False,"message": 'dont auth'}), media_type='application/json')
+        raise HTTPException(status_code=400, detail="Dont auth")
     elif check_password(db=db, users_email=user.email, password=user.password):
         key_for_cookie = 'session'
         signed_username = base64.b64encode(db_user.email.encode()).decode() + '.' + sign_data(db_user.email)
-        response = Response(json.dumps({"sucsess": True, "message": None, "username": f'{db_user.name}'}), media_type='application/json')
+        response = Response(json.dumps({"username": f'{db_user.name}'}), media_type='application/json')
         response.set_cookie(key=key_for_cookie, value=signed_username)
         return response
-    return Response(json.dumps({"sucsess": False,"message": 'dont auth'}), media_type='application/json')
+    raise HTTPException(status_code=400, detail="Dont auth")
 
 
 @app.get('/logout')
@@ -166,7 +184,7 @@ def get_registration(session: Optional[str] = Cookie(default=None)):
             registration_page = regiistation_html.read()
         return Response(registration_page, media_type='text/html')
     if check_session.SESSION_IS_INVALID:
-        response = RedirectResponse(url='/', status_code=303)
+        response = Response(registration_page, media_type='text/html')
         response.delete_cookie(key="session")
         return response
     return RedirectResponse(url='/', status_code=303)
@@ -180,8 +198,8 @@ def post_registration(user: schemas.UserIn = Body(...), db: Session = Depends(ge
         db_user = crud.create_user(db=db, user=user)
         key_for_cookie = 'session'
         signed_username = base64.b64encode(user.email.encode()).decode() + '.' + sign_data(user.email)
-        response = Response(json.dumps({"sucsess": True, "message": None, "name": f'{user.name}'}), media_type='application/json')
+        response = Response(json.dumps({"name": f'{user.name}'}), media_type='application/json')
         response.set_cookie(key=key_for_cookie, value=signed_username)
         return response
     else:
-        return Response(json.dumps({"sucsess": False,"message": 'The user already exists'}), media_type='application/json')
+        raise HTTPException(status_code=400, detail="The user already exists")

@@ -33,6 +33,10 @@ class BookChange(BookBase):
     description: Optional[str] = None
 
 
+class DeleteBook(BaseModel):
+    id :int
+
+
 class BookAuthorSearch(BaseModel):
     search_request: str
    
