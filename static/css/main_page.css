@@ -1,0 +1,172 @@
+* {
+    box-sizing: border-box; 
+  }
+  body {
+    margin: 0;
+    background-color:#f8f8ff;
+    width: auto;
+    
+  }
+  #main {
+    display: flex;
+    min-height: 80vh;
+    height: auto;
+    
+  }
+  #field {
+    display: flex;
+    flex-direction: column;
+    
+    align-items: center;
+    height: auto;
+  }
+  .book{
+    margin: 20px;
+    background:#ededf7;
+    height: auto;
+    width: 53vw;
+    min-height: 15vh;
+    min-width: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    /*padding: 1em;*/
+    align-content: flex-start;
+    word-wrap: break-word;
+  }
+ 
+
+  #main > #field {
+    background: #f8f8ff;
+    flex: 1;
+  }
+
+  .add_inp {
+    padding: 1em;
+    margin-left: 0.5vw;
+    margin-right: 0.5vw;
+    height: 7vh;
+    width: 41vw;
+    background: #f8f8ff;
+    max-height: 50px;
+  }
+  
+  #header, #field, #left, #right, #add, #inp, #search {
+    padding: 1em;
+  }
+  header {
+    display: flex;
+    flex-direction: column; 
+    justify-content: center;
+    align-items: center;
+    
+    
+  }
+
+  #header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f8f8ff;
+    height: 10vh;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    margin: 20px;
+  }
+  #add, #inp, #search {
+    /*margin: 5px;*/
+    margin-left: 0.5vw;
+    margin-right: 0.5vw;
+  }
+  #add {
+    background: #9898ec;
+    height: 7vh;
+    width: 5vw;
+    min-width: 50px;
+    min-height: 15px;
+    max-height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    cursor: pointer;
+
+  }
+
+  #inp {
+    height: 7vh;
+    width: 41vw;
+    background: #f8f8ff;
+    
+    max-height: 50px;
+    
+  }
+
+  #search {
+    background: #9898ec;
+    height: 7vh;
+    width: 5vw;
+    min-height: 15px;
+    min-width: 50px;
+    max-height: 50px;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    cursor: pointer;
+
+  }
+  .send {
+    background: #9898ec;
+    height: 7vh;
+    width: 7vw;
+    min-width: 50px;
+    min-height: 15px;
+    max-height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 60px;
+    margin: 7px;
+    cursor: pointer;
+  }
+  #title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 5vh;
+  }
+
+  #edit_flex {
+    display: flex;
+    justify-content:right;
+    align-items:right;
+    flex-direction:row;
+    
+    height: auto;
+    width: 53vw;
+  }
+
+  .edit_button {
+    display: flex;
+    background: #98cdec;
+    height: 6vh;
+    width: 3vw;
+    margin: 5px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    min-width: 35px;
+    min-height: 18px;
+    max-width: 45px;
+    max-height: 28px;
+    margin-right: 10px;
+  }
+
+  #logout {
+      position: fixed; 
+      top: 20px; 
+      right: 20px;
+  }

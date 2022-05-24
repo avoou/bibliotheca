@@ -1,5 +1,6 @@
 from fastapi import Depends, FastAPI, Body, HTTPException, Cookie
 from fastapi.responses import Response, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from db import models, schemas, crud
 from db.database import SessionLocal, engine
@@ -15,6 +16,7 @@ from db.crud import SALT
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 def get_db():
     db = SessionLocal()
@@ -40,7 +42,7 @@ def search_book_author(search_request: str, db: Session = Depends(get_db)):
     authors_list = [author.strip() for author in re.split(r'[;,]',search_request)]
     all_books_by_author = crud.get_authors_by_fullnames(db=db, authors=authors_list)
     if all_books_by_author:
-        book_list = {"books":[schemas.BookOut.from_orm(book).dict() for book in all_books_by_author]} 
+        book_list = {"books":[schemas.BookOut.from_orm(book).dict() for book in all_books_by_author]}
         return Response(json.dumps(book_list), media_type='application/json')
     raise HTTPException(status_code=400, detail="Nothing was found for your query")
     
@@ -113,7 +115,7 @@ def check_password(db: Session, users_email: str, password: str):
 
 @app.get('/')
 def index_page(session: Optional[str] = Cookie(default=None)):
-    with open('./templates/main_page_non_login.html', 'r') as html_file:
+    with open('./static/templates/main_page_non_login.html', 'r') as html_file:
         non_login_page = html_file.read()
 
     check_session = CheckSession()
@@ -126,14 +128,14 @@ def index_page(session: Optional[str] = Cookie(default=None)):
         response = Response(non_login_page, media_type='text/html')
         response.delete_cookie(key="session")
         return response
-    with open('./templates/main_page.html', 'r') as html_file:
+    with open('./static/templates/main_page.html', 'r') as html_file:
         main_page = html_file.read()
     return Response(main_page, media_type='text/html')
 
 
 @app.get('/login')
 def login(session: Optional[str] = Cookie(default=None)):
-    with open('./templates/login.html', 'r') as html_file:
+    with open('./static/templates/login.html', 'r') as html_file:
         login_page = html_file.read()
 
     check_session = CheckSession()
@@ -146,7 +148,7 @@ def login(session: Optional[str] = Cookie(default=None)):
         response = Response(login_page, media_type='text/html')
         response.delete_cookie(key="session")
         return response
-    with open('./templates/main_page.html', 'r') as html_file:
+    with open('./static/templates/main_page.html', 'r') as html_file:
         main_page = html_file.read()
     return Response(main_page, media_type='text/html')
 
@@ -167,11 +169,8 @@ def process_login_page(user: schemas.UserIn = Body(...), db: Session = Depends(g
 
 @app.get('/logout')
 def logout():
-    try:
-        response = Response(json.dumps({"sucsess": True}), media_type='text/html')
-        response.delete_cookie(key="session")
-    except Exception:
-        return Response(json.dumps({"sucsess": False}), media_type='text/html')
+    response = Response()
+    response.delete_cookie(key="session")
     return response
 
 
@@ -180,7 +179,7 @@ def get_registration(session: Optional[str] = Cookie(default=None)):
     check_session = CheckSession()
     check_session.check(session)
     if check_session.SESSION_IS_NOT:
-        with open('./templates/registration_page.html', 'r') as regiistation_html:
+        with open('./static/templates/registration_page.html', 'r') as regiistation_html:
             registration_page = regiistation_html.read()
         return Response(registration_page, media_type='text/html')
     if check_session.SESSION_IS_INVALID:
