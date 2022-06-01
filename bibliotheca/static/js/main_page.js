@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function(){
             id: '',
             book_json: '',
             authors: '',
-            inner_html: '112',
+            inner_html: '',
             edit_button_func: function () {
               let book_entry_html = document.getElementById(`book${this.book_json["id"]}`)
               book_entry_html.innerHTML = `
@@ -83,6 +83,7 @@ document.addEventListener('DOMContentLoaded', function(){
                 })
 
                 const response_json = await response.json()
+                console.log(response_json)
                 if (response.ok) {
                   let warning_message = document.getElementById(`warning${self.book_json["id"]}`)
                   warning_message.style.textAlign = "center"
@@ -94,10 +95,9 @@ document.addEventListener('DOMContentLoaded', function(){
                   warning_message.innerText = response_json.detail
                   warning_message.style.color = "red"
                 }
-
-
               })
             },
+
             fill_in_inner_html: function () {
               let authors = ''
               for (let index=0; index<this.book_json["authors"].length; index++) {
@@ -118,7 +118,6 @@ document.addEventListener('DOMContentLoaded', function(){
                                     Edit
                                   </div>
                                 </div>
-                                
                                 <div id="warning${this.book_json["id"]}"></div>
                                 </div>`
             },
@@ -126,12 +125,8 @@ document.addEventListener('DOMContentLoaded', function(){
             delete_book: async function () {
               let self = this
               let response = await fetch(`book/${this.book_json["id"]}`, {
-                  
                   method: "DELETE",
-                  
                 })
-              
-                let response_json = await response.json()
                 if (response.ok) {
                   let book_entry = document.getElementById(`book${this.book_json["id"]}`)
                   book_entry.innerHTML = 'The book is deleted!'
@@ -152,12 +147,6 @@ document.addEventListener('DOMContentLoaded', function(){
             book_entry_array.push(obj_book_entry)
             field.innerHTML += obj_book_entry.inner_html 
           }
-          
-          /*div_array = document.querySelectorAll("div[name=btn]")
-          for (let div_index=0; div_index<div_array.length; div_index++) {
-            let btn = div_array[div_index]
-            btn.addEventListener('click', function (){book_entry_array[div_index].edit_button_func()})
-          }*/
 
           for (let book_entry of book_entry_array) {
             edit_btn = document.getElementById(`edit${book_entry.book_json["id"]}`)
@@ -207,8 +196,6 @@ document.addEventListener('DOMContentLoaded', function(){
                     })                 
                 })
                 let response_json = await response.json()
-                console.log("OK: ",response.ok)
-
                 if (response.ok){
                   let warning_message = document.querySelector('div[name=warning]')
                   warning_message.style.textAlign = "center"

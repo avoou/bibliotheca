@@ -13,13 +13,20 @@ import re
 import hmac
 import hashlib
 import base64
+import configparser
+import os
 
+config = configparser.ConfigParser()
+current_path = os.path.dirname(os.path.abspath(__file__))
+path_to_config = os.path.join(current_path, 'settings.ini')
+config.read(path_to_config)
 
 MAIN_PAGE_NON_LOGIN = './static/templates/main_page_non_login.html'
 MAIN_PAGE = './static/templates/main_page.html'
 LOGIN = './static/templates/login.html'
 REGISTRATION_PAGE = './static/templates/registration_page.html'
-SECRET_KEY = '6dfd98adf2601c1f54c794fb8376794805972d71d906a3021525b90e54911a4f'
+#SECRET_KEY = '6dfd98adf2601c1f54c794fb8376794805972d71d906a3021525b90e54911a4f'
+SECRET_KEY = config["Bibliotheca"]["secret_key"]
 
 #models.Base.metadata.create_all(bind=engine)
 
@@ -56,7 +63,7 @@ def search_book_author(search_request: str, db: Session = Depends(get_db)):
     raise HTTPException(status_code=400, detail="Nothing was found for your query")
     
 
-@app.put("/edit")
+@app.put("/edit", response_model=schemas.BookOut)
 def edit_exists_book(book: schemas.BookChange, db: Session = Depends(get_db)):
     db_book = crud.book_change(book=book, db=db)
     if db_book:
