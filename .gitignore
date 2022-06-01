@@ -1,5 +1,4 @@
 __pycache__
-kreker_env
-.vscode
+env
 alembic
 alembic.ini
