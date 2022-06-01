@@ -5,8 +5,16 @@ from database import engine
 import hashlib
 import models
 import schemas
+import configparser
+import os
 
-SALT = 'b8c4703bffd39be0729fe85bf4d798bd4d5809f8121a81f8cfb20a286fec6104'
+config = configparser.ConfigParser()
+current_path = os.path.dirname(os.path.abspath(__file__))
+path_to_config = os.path.join(current_path, 'settings.ini')
+config.read(path_to_config)
+
+#SALT = 'b8c4703bffd39be0729fe85bf4d798bd4d5809f8121a81f8cfb20a286fec6104'
+SALT = config["Bibliotheca"]["salt"]
 
 def get_user_by_email(db: Session, email: str):
     pass
@@ -63,7 +71,16 @@ def get_author_by_fullname(db: Session, full_name: str):
 
 def book_change(db: Session, book: schemas.BookChange):
     #id=5 title='book2' authors=[Author(id=None, full_name='author1', fast_facts=None), Author(id=None, full_name='author2', fast_facts=None)]
+    db_book = db.query(models.Book).get(book.id)
+    db_authors_book = [author.full_name for author in db_book.authors]
     authors = [author.full_name for author in book.authors]
+    if db_book.title == book.title and set(db_authors_book) == set(authors):
+        db_book.description = book.description
+        db.add(db_book)
+        db.commit()
+        db.refresh(db_book)
+        return db_book
+    
     all_auth_books = get_all_authors_books(db=db, list_of_authors_fullnames=authors)
     if all_auth_books:
         for auth_book in all_auth_books:
